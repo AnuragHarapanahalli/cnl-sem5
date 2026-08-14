@@ -1,62 +1,69 @@
-#include <iostream>
-#include <cmath>
-#include <string>
+import math
 
-using namespace std;
+# 1. Get user input for Base IP and CIDR prefix
+ip = input("Enter base IP address (e.g., 192.168.10.0): ")
+cidr = int(input("Enter CIDR prefix (e.g., 26 for /26): "))
 
-int main() {
-    int o1, o2, o3, o4;
-    char dot;
-    int cidr;
+# Split IP address into four octets
+o1, o2, o3, o4 = map(int, ip.split("."))
 
-    // 1. Get user input for Base IP and CIDR prefix
-    cout << "Enter base IP address (e.g., 192.168.10.0): ";
-    cin >> o1 >> dot >> o2 >> dot >> o3 >> dot >> o4;
+# Validate for Class C subnetting range
+if cidr < 24 or cidr > 30:
+    print("Error: This program currently supports Class C subnetting (CIDR 24 to 30).")
+    exit()
 
-    cout << "Enter CIDR prefix (e.g., 26 for /26): ";
-    cin >> cidr;
+# 2. Calculate subnetting details
 
-    // Validate for Class C subnetting range
-    if (cidr < 24 || cidr > 30) {
-        cout << "Error: This program currently supports Class C subnetting (CIDR 24 to 30)." << endl;
-        return 1;
-    }
+# Number of host bits
+hostBits = 32 - cidr
 
-    // 2. Calculate the core subnetting details
-    int hostBits = 32 - cidr;
-    int blockSize = pow(2, hostBits);
-    int numSubnets = 256 / blockSize;
-    int usableHosts = blockSize - 2;
-    int lastOctetMask = 256 - blockSize;
+# Size of each subnet
+blockSize = 2 ** hostBits
 
-    // Display general subnet information
-    cout << "\n--- General Subnet Information ---" << endl;
-    cout << "Calculated Subnet Mask : 255.255.255." << lastOctetMask << endl;
-    cout << "Total Usable Hosts     : " << usableHosts << " per subnet" << endl;
-    cout << "Total Subnets Created  : " << numSubnets << "\n" << endl;
+# Number of subnets
+numSubnets = 256 // blockSize
 
-    // 3 & 4. Calculate and Display specifics for each subnet
-    for (int i = 0; i < numSubnets; ++i) {
-        int network = i * blockSize;
-        int firstHost = network + 1;
-        int lastHost = network + usableHosts;
-        int broadcast = network + blockSize - 1;
+# Usable hosts in each subnet
+usableHosts = blockSize - 2
 
-        cout << "=========================================" << endl;
-        cout << "Subnet " << (i + 1) << endl;
-        cout << "=========================================" << endl;
-        cout << "Network Address   : " << o1 << "." << o2 << "." << o3 << "." << network << endl;
-        cout << "First Host        : " << o1 << "." << o2 << "." << o3 << "." << firstHost << endl;
-        cout << "Last Host         : " << o1 << "." << o2 << "." << o3 << "." << lastHost << endl;
-        cout << "Broadcast Address : " << o1 << "." << o2 << "." << o3 << "." << broadcast << endl;
+# Last octet of subnet mask
+lastOctetMask = 256 - blockSize
 
-        // Print all usable IP addresses in this subnet
-        cout << "\nUsable IP Addresses:" << endl;
-        for (int j = firstHost; j <= lastHost; ++j) {
-            cout << "  " << o1 << "." << o2 << "." << o3 << "." << j << endl;
-        }
-        cout << endl;
-    }
+# Display general subnet information
+print("\n--- General Subnet Information ---")
+print("Calculated Subnet Mask :", "255.255.255." + str(lastOctetMask))
+print("Total Usable Hosts     :", usableHosts, "per subnet")
+print("Total Subnets Created  :", numSubnets)
+print()
 
-    return 0;
-}
+# 3 & 4. Calculate and display each subnet
+for i in range(numSubnets):
+
+    # Network address
+    network = i * blockSize
+
+    # First usable host
+    firstHost = network + 1
+
+    # Last usable host
+    lastHost = network + usableHosts
+
+    # Broadcast address
+    broadcast = network + blockSize - 1
+
+    print("=========================================")
+    print("Subnet", i + 1)
+    print("=========================================")
+
+    print("Network Address   :", f"{o1}.{o2}.{o3}.{network}")
+    print("First Host        :", f"{o1}.{o2}.{o3}.{firstHost}")
+    print("Last Host         :", f"{o1}.{o2}.{o3}.{lastHost}")
+    print("Broadcast Address :", f"{o1}.{o2}.{o3}.{broadcast}")
+
+    # Print all usable IP addresses
+    print("\nUsable IP Addresses:")
+
+    for j in range(firstHost, lastHost + 1):
+        print(f"  {o1}.{o2}.{o3}.{j}")
+
+    print()
